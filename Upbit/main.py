@@ -6,10 +6,25 @@ from fbprophet import Prophet
 
 import upbit
 
+
+ada_dict = upbit.get_price_min('60', 'ADA')
+# 'date': date_list
+# 'open': open price
+# 'high': high price
+# 'low': low price
+# 'trade': end price
+# 'volume': volume
+date_list = ada_dict['date']
+price_list = ada_dict['trade']
+
+hour = str(int(date_list[0][11:13]))+':00:00'
+start_time = date_list[0][:10] +' '+hour
+print(start_time)
+df = pd.DataFrame({'ds':pd.date_range(start_time, periods=date_list.__len__(), freq='h'), 'y':price_list})
 # price name openingPrice, highPrice, lowPrice, tradePrice, candleDateTimeKst
 #btc_price = upbit.get_price(term='minutes', interval='60', coin_name='BTC', count='200', price_name='tradePrice')
-ada_price = upbit.get_price(term='minutes', interval='60', coin_name='ADA', count='200', price_name='tradePrice')
-time_stamp = upbit.get_price(term='minutes', interval='60', coin_name='ADA', count='200', price_name='candleDateTimeKst')
+# ada_price = upbit.get_price(term='minutes', interval='60', coin_name='ADA', count='200', price_name='tradePrice')
+# time_stamp = upbit.get_price(term='minutes', interval='60', coin_name='ADA', count='200', price_name='candleDateTimeKst')
 
 #xrp_price = list(map(int, xrp_price))
 #print(xrp_price)
@@ -28,28 +43,22 @@ time_stamp = upbit.get_price(term='minutes', interval='60', coin_name='ADA', cou
 #plt.legend(loc='best')
 #plt.show()
 
-date = time_stamp[0][:10]
-hour1 = int(time_stamp[0][11:13])
-hour = str(hour1)+':00:00'
-start_time = date +' '+hour
-#df = pd.DataFrame({'ds':pd.date_range('2018-01-14 17:00:00', periods=200, freq='h'), 'y':xrp_price})
-df = pd.DataFrame({'ds':pd.date_range(start_time, periods=200, freq='h'), 'y':ada_price})
+# df = pd.DataFrame({'ds':pd.date_range(start_time, periods=200, freq='h'), 'y':ada_price})
 #df = pd.DataFrame({'ds':time_stamp, 'y':xrp_price})
 #df.reset_index(inplace=True)
 #df.head()
 #print(df)
 
-#m = Prophet(yearly_seasonality=False, weekly_seasonality=False)
 m = Prophet(yearly_seasonality=False, weekly_seasonality=True)
 m.fit(df)
-
+# 
 future_dates = m.make_future_dataframe(freq='h',periods=48)
-
+# 
 forecast = m.predict(future_dates)
-#m.plot(forecast)
-#m.plot_components(forecast)
+m.plot(forecast)
+m.plot_components(forecast)
 #print(forecast)
-#plt.show()
+plt.show()
 
 #x = pd.date_range(start_time, periods=200, freq='h')
 #x = x + future_dates

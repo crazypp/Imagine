@@ -2,9 +2,10 @@ import requests
 import json
 import datetime
 
+headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+
 # price name openingPrice, highPrice, lowPrice, tradePrice, candleDateTimeKst
 def get_price(term, interval, coin_name, count, price_name='tradePrice'):
-    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
     url = "https://crix-api.upbit.com/v1/crix/candles/{term}/{interval}?code=CRIX.UPBIT.KRW-{coin_name}&count={count}".format( term = term, interval = interval, coin_name = coin_name, count = count)
     
     response =requests.get(url, headers=headers)
@@ -28,19 +29,39 @@ def get_price(term, interval, coin_name, count, price_name='tradePrice'):
 # make request url list
 def make_url_list(interval, coin_name):
     num_req_count = 100
-    start_time = datetime.datetime(2018,1,17,0,0)
-    end_time = datetime.datetime.now()
-    num_dates = end_time-start_time
-    num_hours = (num_dates.days*24) + (num_dates.seconds//3600)
-    num_req = num_hours//num_req_count
-    num_req_remain = num_hours%num_req_count
+    end_date = datetime.datetime(2017,10,1,0,0)
     delta_hour = datetime.timedelta(hours=num_req_count)
-    req_date = start_time
-    url_list = []
-    for i in range(0, num_req+1):
-        req_str_date = req_date.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    cur_date = datetime.datetime.now() - datetime.timedelta(hours=9) # UTC
+ 
+    url_list = []   
+    req_date = cur_date
+    while end_date < req_date:
+        req_str_date = req_date.strftime("%Y-%m-%dT%H:00:00.000Z")
         url = 'https://crix-api-endpoint.upbit.com/v1/crix/candles/minutes/{interval}?code=CRIX.UPBIT.KRW-{coin_name}&count={num_req_count}&to={req_str_date}'.format(interval=interval, coin_name=coin_name, num_req_count=num_req_count, req_str_date=req_str_date)
         url_list.append(url)
-        req_date = req_date + delta_hour
+        req_date = req_date - delta_hour
     return url_list
 
+# return dict
+def get_price_min(interval='60', coin_name='BTC'):
+    url_list = make_url_list(interval, coin_name)
+    open_price_list = [] # 시가
+    high_price_list = [] # 고가
+    low_price_list = [] # 저가
+    trade_price_list = [] #종가
+    trade_volume_list = [] # 거래량
+    date_list = []
+    for url in url_list:
+        response = requests.get(url, headers=headers)
+        price_data = response.json()
+        
+        for item in price_data:
+            open_price_list.insert(0, item['openingPrice'])
+            high_price_list.insert(0, item['highPrice'])
+            low_price_list.insert(0, item['lowPrice'])
+            trade_price_list.insert(0, item['tradePrice'])
+            trade_volume_list.insert(0, item['candleAccTradeVolume'])
+            date_list.insert(0, item['candleDateTimeKst'])
+
+    return {'date': date_list, 'open': open_price_list, 'high':high_price_list, 'low':low_price_list, 'trade':trade_price_list, 'volume':trade_volume_list}
+    

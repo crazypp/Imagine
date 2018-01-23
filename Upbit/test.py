@@ -1,10 +1,12 @@
 import requests
 import json
 import upbit
+import datetime
 
-def get_price_min(interval, coin_name, price_name='tradePrice'):
-    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+def get_price_min(interval='60', coin_name='ADA', price_name='tradePrice'):
     url_list = upbit.make_url_list(interval, coin_name)
+    data = {}
     price_list = []
     date_list = []
     for url in url_list:
@@ -19,12 +21,20 @@ def get_price_min(interval, coin_name, price_name='tradePrice'):
             if 'KRW' in code:
                 price_list.insert(0, price)
                 date_list.insert(0, dateKst)
-        
-    idx = 0
-    for price in price_list:
-        print('i=', idx, 'Day=',date_list[idx], ' Price=', price_list[idx])
-        idx = idx + 1
-        
+     
+    data = {'date': date_list, 'price': price_list}
+#     idx = 0
+#     for price in price_list:
+#         print('i=', idx, 'Day=',date_list[idx], ' Price=', price_list[idx])
+#         idx = idx + 1
+    return data
         
 
-get_price_min('60', 'ADA')
+data_dic = get_price_min()
+list1 = data_dic['date']
+list2 = data_dic['price']
+print(list1.__len__())
+# idx = 0
+# for p in list1:
+#     print(list1[idx],'  ',list2[idx])
+#     idx = idx+1

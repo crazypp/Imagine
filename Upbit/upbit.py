@@ -29,17 +29,18 @@ def get_price(term, interval, coin_name, count, price_name='tradePrice'):
 # make request url list
 def make_url_list(interval, coin_name):
     num_req_count = 100
-    end_date = datetime.datetime(2017,10,1,0,0)
-    delta_hour = datetime.timedelta(hours=num_req_count)
+    #end_date = datetime.datetime(2017,10,1,0,0)
+    end_date = datetime.datetime(2018,1,1,0,0)
+    delta_time = datetime.timedelta(minutes=(num_req_count*int(interval)))
     cur_date = datetime.datetime.now() - datetime.timedelta(hours=9) # UTC
  
     url_list = []   
     req_date = cur_date
     while end_date < req_date:
-        req_str_date = req_date.strftime("%Y-%m-%dT%H:00:00.000Z")
+        req_str_date = req_date.strftime("%Y-%m-%dT%H:%M:00.000Z")
         url = 'https://crix-api-endpoint.upbit.com/v1/crix/candles/minutes/{interval}?code=CRIX.UPBIT.KRW-{coin_name}&count={num_req_count}&to={req_str_date}'.format(interval=interval, coin_name=coin_name, num_req_count=num_req_count, req_str_date=req_str_date)
         url_list.append(url)
-        req_date = req_date - delta_hour
+        req_date = req_date - delta_time
     return url_list
 
 # return dict

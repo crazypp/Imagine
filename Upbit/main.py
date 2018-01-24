@@ -16,9 +16,13 @@ ada_dict = upbit.get_price_min('60', 'ADA')
 # 'volume': volume
 date_list = ada_dict['date']
 price_list = ada_dict['trade']
+print('list size = ', date_list.__len__())
+print('First Date = ', date_list[0])
 
-hour = str(int(date_list[0][11:13]))+':00:00'
-start_time = date_list[0][:10] +' '+hour
+#hour = str(int(date_list[0][11:13]))+':00:00'
+#hour = str(int(date_list[0][11:13]))+':'+str(int(date_list[0][11:13]))+':00'
+hour = '%02d:%02d:%02d' % (int(date_list[0][11:13]), int(date_list[0][14:16]), int('00'))
+start_time = date_list[0][:10] +' '+ hour
 print(start_time)
 df = pd.DataFrame({'ds':pd.date_range(start_time, periods=date_list.__len__(), freq='h'), 'y':price_list})
 # price name openingPrice, highPrice, lowPrice, tradePrice, candleDateTimeKst

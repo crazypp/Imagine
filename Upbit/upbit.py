@@ -29,10 +29,10 @@ def get_price(term, interval, coin_name, count, price_name='tradePrice'):
 # make request url list
 def make_url_list(interval, coin_name):
     num_req_count = 100
-    #end_date = datetime.datetime(2017,10,1,0,0)
-    end_date = datetime.datetime(2018,1,1,0,0)
+    end_date = datetime.datetime(2017,10,1,0,0)
+    #end_date = datetime.datetime(2018,1,1,0,0)
     delta_time = datetime.timedelta(minutes=(num_req_count*int(interval)))
-    cur_date = datetime.datetime.now() - datetime.timedelta(hours=9) # UTC
+    cur_date = datetime.datetime.now() - datetime.timedelta(hours=(9+24)) # UTC
  
     url_list = []   
     req_date = cur_date
@@ -46,11 +46,11 @@ def make_url_list(interval, coin_name):
 # return dict
 def get_price_min(interval='60', coin_name='BTC'):
     url_list = make_url_list(interval, coin_name)
-    open_price_list = [] # 시가
-    high_price_list = [] # 고가
-    low_price_list = [] # 저가
-    trade_price_list = [] #종가
-    trade_volume_list = [] # 거래량
+    open_price_list = [] # open price
+    high_price_list = [] # high price
+    low_price_list = [] # low price
+    trade_price_list = [] # close price
+    trade_volume_list = [] # Volume
     date_list = []
     for url in url_list:
         response = requests.get(url, headers=headers)

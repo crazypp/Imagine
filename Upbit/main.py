@@ -56,7 +56,7 @@ df = pd.DataFrame({'ds':pd.date_range(start_time, periods=date_list.__len__(), f
 m = Prophet(yearly_seasonality=False, weekly_seasonality=True)
 m.fit(df)
 # 
-future_dates = m.make_future_dataframe(freq='h',periods=48)
+future_dates = m.make_future_dataframe(freq='h',periods=96)
 # 
 forecast = m.predict(future_dates)
 m.plot(forecast)

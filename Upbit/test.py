@@ -1,11 +1,23 @@
-import requests
-import json
-import upbit
-import datetime
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 
-ada_dict = upbit.get_price_min('10', 'ADA')
-date_list = ada_dict['date']
-print('date size=',date_list.__len__())
+majorLocator = MultipleLocator(10)
+#majorFormatter = FormatStrFormatter('%d')
+#minorLocator = MultipleLocator(5)
 
-for date in date_list:
-    print(date)
+
+t = np.arange(0.0, 100.0, 0.1)
+s = np.sin(0.1*np.pi*t)*np.exp(-t*0.01)
+
+fig, ax = plt.subplots()
+plt.plot(t, s)
+
+ax.xaxis.set_major_locator(majorLocator)
+#ax.xaxis.set_major_formatter(majorFormatter)
+
+# for the minor ticks, use no labels; default NullFormatter
+#ax.xaxis.set_minor_locator(minorLocator)
+
+# plt.grid()
+plt.show()

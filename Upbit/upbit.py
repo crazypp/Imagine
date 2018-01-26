@@ -29,10 +29,10 @@ def get_price(term, interval, coin_name, count, price_name='tradePrice'):
 # make request url list
 def make_url_list(interval, coin_name):
     num_req_count = 100
-    end_date = datetime.datetime(2017,10,1,0,0)
-    #end_date = datetime.datetime(2018,1,1,0,0)
+    #end_date = datetime.datetime(2017,10,1,0,0)
+    end_date = datetime.datetime(2018,1,10,0,0)
     delta_time = datetime.timedelta(minutes=(num_req_count*int(interval)))
-    cur_date = datetime.datetime.now() - datetime.timedelta(hours=(9+24)) # UTC
+    cur_date = datetime.datetime.now() - datetime.timedelta(hours=9) # UTC
  
     url_list = []   
     req_date = cur_date
@@ -62,7 +62,9 @@ def get_price_min(interval='60', coin_name='BTC'):
             low_price_list.insert(0, item['lowPrice'])
             trade_price_list.insert(0, item['tradePrice'])
             trade_volume_list.insert(0, item['candleAccTradeVolume'])
-            date_list.insert(0, item['candleDateTimeKst'])
+#             datetime.datetime.strptime(item['candleDateTimeKst'], '%Y-%m-%dT%H:%M:%S').strftime("%Y-%m-%d %H:%M:%S")
+#             date_list.insert(0, item['candleDateTimeKst'])
+            date_list.insert(0, datetime.datetime.strptime(item['candleDateTimeKst'], '%Y-%m-%dT%H:%M:%S+09:00').strftime("%Y-%m-%d %H:%M:%S"))
 
     return {'date': date_list, 'open': open_price_list, 'high':high_price_list, 'low':low_price_list, 'trade':trade_price_list, 'volume':trade_volume_list}
     

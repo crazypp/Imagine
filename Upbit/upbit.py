@@ -33,7 +33,12 @@ def make_url_list(interval, coin_name):
     end_date = datetime.datetime(2018,1,10,0,0)
     delta_time = datetime.timedelta(minutes=(num_req_count*int(interval)))
     cur_date = datetime.datetime.now() - datetime.timedelta(hours=9) # UTC
- 
+    
+    min_str = cur_date.strftime("%M")
+    del_min = int(min_str)%int(interval)
+    
+    cur_date = cur_date - datetime.timedelta(minutes=del_min)
+    
     url_list = []   
     req_date = cur_date
     while end_date < req_date:

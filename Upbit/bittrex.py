@@ -31,7 +31,7 @@ def get_price_5min(coin_name):
     return {'date': date_list, 'open': open_price_list, 'high':high_price_list, 'low':low_price_list, 'trade':trade_price_list, 'volume':trade_volume_list}
 
 urls = upbit.make_url_list('5', 'ADA')
-
+ 
 idx = 0
 last_time2 = datetime.datetime.now()
 for url in urls:
@@ -42,9 +42,9 @@ for url in urls:
     last_time = datetime.datetime.strptime(data[-1]['candleDateTimeKst'], '%Y-%m-%dT%H:%M:%S+09:00')
     if first_time != last_time2:
         print('%d th not same'% idx)
-    
+     
     last_time2 = last_time - datetime.timedelta(minutes=5)
-
+ 
     idx = idx + 1
 
 

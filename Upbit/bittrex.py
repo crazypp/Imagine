@@ -1,6 +1,8 @@
 #https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=USDT-ADA&tickInterval=thirtyMin
 #https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=USDT-ADA&tickInterval=hour
 #https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=USDT-ADA&tickInterval=fiveMin
+
+#https://crix-api-endpoint.upbit.com/v1/crix/candles/minutes/5?code=CRIX.UPBIT.KRW-ADA&count=100&to=2018-01-28T12:45:00.000Z
 import requests
 import json
 import datetime
@@ -30,23 +32,44 @@ def get_price_5min(coin_name):
         date_list.append((datetime.datetime.strptime(item['T'], '%Y-%m-%dT%H:%M:%S') + datetime.timedelta(hours=9)).strftime("%Y-%m-%d %H:%M:%S")) # UTC to KST
     return {'date': date_list, 'open': open_price_list, 'high':high_price_list, 'low':low_price_list, 'trade':trade_price_list, 'volume':trade_volume_list}
 
-urls = upbit.make_url_list('5', 'ADA')
- 
-idx = 0
-last_time2 = datetime.datetime.now()
-for url in urls:
-    print('(%d) url=%s'%(idx, url))
-    data = requests.get(url, headers=headers).json()
-    print('len(%d) first=[%s], last=[%s]'% (len(data), data[0]['candleDateTimeKst'], data[-1]['candleDateTimeKst']))
-    first_time = datetime.datetime.strptime(data[0]['candleDateTimeKst'], '%Y-%m-%dT%H:%M:%S+09:00')
-    last_time = datetime.datetime.strptime(data[-1]['candleDateTimeKst'], '%Y-%m-%dT%H:%M:%S+09:00')
-    if first_time != last_time2:
-        print('%d th not same'% idx)
-     
-    last_time2 = last_time - datetime.timedelta(minutes=5)
- 
-    idx = idx + 1
+interval='5'
+coin_name = 'ADA'
+urls = upbit.make_url_list(interval, coin_name)
 
+open_price_list = [] # open price
+high_price_list = [] # high price
+low_price_list = [] # low price
+trade_price_list = [] # close price
+trade_volume_list = [] # Volume
+date_list = []
+for url in urls:
+    delta_5min = datetime.timedelta(minutes=5)
+    data_list = requests.get(url, headers=headers).json()
+    prev_date = datetime.datetime.strptime(url, 'https://crix-api-endpoint.upbit.com/v1/crix/candles/minutes/5?code=CRIX.UPBIT.KRW-ADA&count=100&to=%Y-%m-%dT%H:%M:00.000Z')
+    prev_date = prev_date + datetime.timedelta(hours=9) - delta_5min
+    for data in data_list:
+        date = datetime.datetime.strptime(data['candleDateTimeKst'], '%Y-%m-%dT%H:%M:%S+09:00') # kst time
+        expected_date = prev_date - delta_5min
+        if date != expected_date: # fix the data
+            date_str = (expected_date + delta_5min).strftime("%Y-%m-%dT%H:%M:00.000Z")
+            #https://crix-api-endpoint.upbit.com/v1/crix/candles/minutes/5?code=CRIX.UPBIT.KRW-ADA&count=100&to=2018-01-28T12:45:00.000Z
+            url1 = ('https://crix-api-endpoint.upbit.com/v1/crix/candles/minutes/{interval}?code=CRIX.UPBIT.KRW-{coin_name}&count=1&to={utc_date}'
+                    .format(interval=interval, coin_name=coin_name, utc_date=date_str))
+            data = requests.get(url1, headers=headers).json()
+            data = data[0]
+
+        open_price_list.insert(0, data['openingPrice'])
+        high_price_list.insert(0, data['highPrice'])
+        low_price_list.insert(0, data['lowPrice'])
+        trade_price_list.insert(0, data['tradePrice'])
+        trade_volume_list.insert(0, data['candleAccTradeVolume'])
+        date_list.insert(0, datetime.datetime.strptime(data['candleDateTimeKst'], '%Y-%m-%dT%H:%M:%S+09:00').strftime("%Y-%m-%d %H:%M:%S"))
+        prev_date = expected_date
+        
+
+#---------------------------------------------------------------------------------
+# for i in range(95, 105, 1):
+#     print('(%d) : Kst(%s) UTC(%s)'% (i, date_list[i]['candleDateTimeKst'], date_list[i]['candleDateTime']))
 
 # upbit_ada_dict = upbit.get_price_min('5', 'ADA')
 # bitrex_ada_dic = get_price_5min('ADA')

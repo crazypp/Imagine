@@ -36,6 +36,7 @@ interval='5'
 coin_name = 'ADA'
 urls = upbit.make_url_list(interval, coin_name)
 
+delta_5min = datetime.timedelta(minutes=5)
 open_price_list = [] # open price
 high_price_list = [] # high price
 low_price_list = [] # low price
@@ -43,20 +44,21 @@ trade_price_list = [] # close price
 trade_volume_list = [] # Volume
 date_list = []
 for url in urls:
-    delta_5min = datetime.timedelta(minutes=5)
+    print('url = %s'% url)
     data_list = requests.get(url, headers=headers).json()
     prev_date = datetime.datetime.strptime(url, 'https://crix-api-endpoint.upbit.com/v1/crix/candles/minutes/5?code=CRIX.UPBIT.KRW-ADA&count=100&to=%Y-%m-%dT%H:%M:00.000Z')
-    prev_date = prev_date + datetime.timedelta(hours=9) - delta_5min
+    prev_date = prev_date + datetime.timedelta(hours=9)
     for data in data_list:
         date = datetime.datetime.strptime(data['candleDateTimeKst'], '%Y-%m-%dT%H:%M:%S+09:00') # kst time
         expected_date = prev_date - delta_5min
         if date != expected_date: # fix the data
-            date_str = (expected_date + delta_5min).strftime("%Y-%m-%dT%H:%M:00.000Z")
+            date_str = (expected_date - datetime.timedelta(hours=9) + delta_5min).strftime("%Y-%m-%dT%H:%M:00.000Z")
             #https://crix-api-endpoint.upbit.com/v1/crix/candles/minutes/5?code=CRIX.UPBIT.KRW-ADA&count=100&to=2018-01-28T12:45:00.000Z
             url1 = ('https://crix-api-endpoint.upbit.com/v1/crix/candles/minutes/{interval}?code=CRIX.UPBIT.KRW-{coin_name}&count=1&to={utc_date}'
                     .format(interval=interval, coin_name=coin_name, utc_date=date_str))
             data = requests.get(url1, headers=headers).json()
             data = data[0]
+            print('fix data:',expected_date, data)
 
         open_price_list.insert(0, data['openingPrice'])
         high_price_list.insert(0, data['highPrice'])
@@ -66,6 +68,15 @@ for url in urls:
         date_list.insert(0, datetime.datetime.strptime(data['candleDateTimeKst'], '%Y-%m-%dT%H:%M:%S+09:00').strftime("%Y-%m-%d %H:%M:%S"))
         prev_date = expected_date
         
+for idx in range(0, len(date_list)-1, 1):
+    if (datetime.datetime.strptime(date_list[idx], "%Y-%m-%d %H:%M:%S") + delta_5min) != datetime.datetime.strptime(date_list[idx+1], "%Y-%m-%d %H:%M:%S"):
+        print('idx(-1)(%d) : %s'%(idx-1, date_list[idx-1]))
+        print('idx(00)(%d) : %s'%(idx, date_list[idx]))
+        print('idx(+1)(%d) : %s'%(idx+1, date_list[idx+1]))
+
+print('len=%d'% len(date_list))
+print('0 : %s'% date_list[0])
+print('1 : %s'% date_list[-1])
 
 #---------------------------------------------------------------------------------
 # for i in range(95, 105, 1):

@@ -58,6 +58,7 @@ for url in urls:
                     .format(interval=interval, coin_name=coin_name, utc_date=date_str))
             data = requests.get(url1, headers=headers).json()
             data = data[0]
+            print('url : ', url1)
             print('fix data:',expected_date, data)
 
         open_price_list.insert(0, data['openingPrice'])

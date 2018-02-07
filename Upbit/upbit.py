@@ -4,6 +4,21 @@ import datetime
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
 
+# get exchanges krw
+# https://quotation-api-cdn.dunamu.com/v1/forex/recent?codes=FRX.KRWUSD,FRX.KRWJPY,FRX.KRWCNY,FRX.KRWEUR
+def get_usd_krw():
+    url = 'https://quotation-api-cdn.dunamu.com/v1/forex/recent?codes=FRX.KRWUSD'
+    exchange =requests.get(url, headers=headers).json()
+    return exchange[0]['cashBuyingPrice']
+#     return exchange[0]['basePrice']
+
+# https://crix-api-endpoint.upbit.com/v1/crix/trades/ticks?code=CRIX.UPBIT.KRW-BTC
+def get_last_price(coin_name):
+    url = 'https://crix-api-endpoint.upbit.com/v1/crix/trades/ticks?code=CRIX.UPBIT.KRW-{coin_name}'.format(coin_name=coin_name)
+    tickValue =  requests.get(url, headers=headers).json()
+    return tickValue[0]['tradePrice']
+
+
 # price name openingPrice, highPrice, lowPrice, tradePrice, candleDateTimeKst
 def get_price(term, interval, coin_name, count, price_name='tradePrice'):
     url = "https://crix-api.upbit.com/v1/crix/candles/{term}/{interval}?code=CRIX.UPBIT.KRW-{coin_name}&count={count}".format( term = term, interval = interval, coin_name = coin_name, count = count)

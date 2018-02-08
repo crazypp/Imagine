@@ -38,33 +38,47 @@ def get_ticker(coin_name):
         idx = idx + 1
     return dict_info
 
+lastPriceBTC = 8387000 # 2018-02-07
+lastPriceADA = 371 # 2018-02-07
+lastPriceNEO = 113100 # 2018-02-07
+lastPricePOWR = 715 # 2018-02-07
+
 def on_timer():
     bitfinexBTCUSD = get_ticker('tBTCUSD')
     LastBTCUSD = bitfinexBTCUSD['LAST_PRICE']
     USDKRW = get_usd_krw() # from KEB Bank
     changedBTCKRW = LastBTCUSD * USDKRW
+    
     upbitBTCKRW = get_last_price('BTC')
     upbitADAKRW = get_last_price('ADA')
+    upbitNEOKRW = get_last_price('NEO')
+    upbitPOWRKRW = get_last_price('POWR')
+    
+    ratio_btc = ((upbitBTCKRW-lastPriceBTC)/lastPriceBTC)*100
+    ratio_ada = ((upbitADAKRW-lastPriceADA)/lastPriceADA)*100
+    ratio_neo = ((upbitNEOKRW-lastPriceNEO)/lastPriceNEO)*100
+    ratio_powr = ((upbitPOWRKRW-lastPricePOWR)/lastPricePOWR)*100
     
     # calculate premium
     diff = upbitBTCKRW - changedBTCKRW
     preminum = (diff / changedBTCKRW) * 100
     
     print("----------------------")
-    print('upbit(KRW) = ', upbitBTCKRW)
-    print('bitfi(KRW) = ', changedBTCKRW)
-    print('bitfi(USD) = ', LastBTCUSD)
-    print('diff(KRW) = ', int(diff))
-    print('preminum = %.02f'% preminum)
-    print('ADA(KRW) = ', upbitADAKRW)
+    print("%12s = %.2f"%('upbit(KRW)', upbitBTCKRW))
+    print("%12s = %.2f"%('bitfi(KRW)', changedBTCKRW))
+    print("%12s = %d"%('Diff (KRW)', int(diff)))
+    print("%12s = %.2f %%"%('Preminum', preminum))
+    print("%12s = %d(%.2f %%)"%('BTC(KRW)', upbitBTCKRW, ratio_btc))
+    print("%12s = %d(%.2f %%)"%('ADA(KRW)', upbitADAKRW, ratio_ada))
+    print("%12s = %d(%.2f %%)"%('NEO(KRW)', upbitNEOKRW, ratio_neo))
+    print("%12s = %d(%.2f %%)"%('POWR(KRW)', upbitPOWRKRW, ratio_powr))
     print("----------------------")
-    timer = threading.Timer(10, on_timer)
+    timer = threading.Timer(30, on_timer)
     timer.start()
 
 def stop_timer():
     timer.cancel()
-    
-global timer
-timer = threading.Timer(30, on_timer)
+
+timer = threading.Timer(1, on_timer)
 timer.start()
 

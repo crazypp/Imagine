@@ -1,6 +1,8 @@
 import requests
 import json
 import threading
+import time
+
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
 
 # https://crix-api-endpoint.upbit.com/v1/crix/trades/days?code=CRIX.UPBIT.KRW-BTC&count=2
@@ -81,7 +83,7 @@ def on_timer():
     preminum = (diff / bitfinex_BTCKRW) * 100
     
 
-    print("----------------------")
+    print("%12s-------------" % time.strftime("%H:%M:%S", time.localtime(upbit_trade_BTCKRW["timestamp"]/1000)))
     print("%12s = %s"%('bitfi(USD)', format(LastBTCUSD, ",.2f")))
     print("%12s = %s"%('Diff(KRW)', format(diff, ",.2f")))
     print("%12s = %.2f %%"%('Preminum', preminum))
@@ -90,11 +92,11 @@ def on_timer():
     print("%12s = %s(%.2f %%)"%('XRP(KRW)', format( int(upbit_tradePrice_XRPKRW), ",d"), upbit_chg_ratio_XRPKRW))
     print("%12s = %s(%.2f %%)"%('NEO(KRW)', format( int(upbit_tradePrice_NEOKRW), ",d"), upbit_chg_ratio_NEOKRW))
     print("----------------------")
-    
-on_timer()
-#     timer = threading.Timer(30, on_timer)
-#     timer.start()
 
-# timer = threading.Timer(1, on_timer)
-# timer.start()
+    timer = threading.Timer(30, on_timer)
+    timer.start()
 
+timer = threading.Timer(1, on_timer)
+timer.start()
+
+# on_timer()

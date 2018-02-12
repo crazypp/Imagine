@@ -5,6 +5,10 @@ import time
 import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
+import math
+from sklearn.preprocessing import MinMaxScaler
+from pandas import DataFrame
+import numpy as np
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
 
@@ -22,8 +26,9 @@ def get_last_block_num():
     
 def get_info():
     # https://api.fork.lol/b508772-517029.fake.csv
-    blocksNo = get_last_block_num()
-    url = "https://api.fork.lol/b{BTCNO}-{BCHNO}.fake.csv".format(BTCNO=blocksNo['BTC'], BCHNO=blocksNo['BCH'])
+#     blocksNo = get_last_block_num()
+#     url = "https://api.fork.lol/b{BTCNO}-{BCHNO}.fake.csv".format(BTCNO=blocksNo['BTC'], BCHNO=blocksNo['BCH'])
+    url = "https://api.fork.lol/b508772-517029.fake.csv"
     info = requests.get(url, headers=headers).json()
     print("Complete Dari info")
     return info
@@ -45,7 +50,7 @@ def get_candle(interval, count, coin_name, timestamp):
 
 dari_info = get_info()
 BtcDariHist = dari_info['BTC']['history']['all']
-print(BtcDariHist)
+
  
 # extract to List
 timestamp = []
@@ -58,6 +63,7 @@ dari=[]
 txs=[]
 cdd=[]
 ClosePrice=[]
+Count = 0
 for item in BtcDariHist:
     timestamp.insert(0, item['timestamp'])
     height.insert(0, item['height'])
@@ -69,11 +75,14 @@ for item in BtcDariHist:
     txs.insert(0, item['txs'])
     cdd.insert(0, item['cdd'])
     # get bitfinex price data
-    candle = get_candle('1m', 1, 'tBTCUSD', item['timestamp'])
-    ClosePrice = candle[0][2]
+#     candle = get_candle('1m', 1, 'tBTCUSD', item['timestamp'])
+#     ClosePrice.insert(0, candle[0][2])
+#     time.sleep(1)
+    ClosePrice.insert(0, 0)
+    print("Processing : ", Count)
+    Count = Count+1
     
 
-     
 # change timestamp to date string
 Dates = []
 for item in timestamp:
@@ -81,16 +90,15 @@ for item in timestamp:
  
 # make DataFrame
 dataFR = {'height':height, 'blocks':blocks, 'avg_diff':avg_diff, 'rate':rate, 'reward_avg':reward_avg, 'dari':dari, 'txs':txs, 'cdd':cdd, 'ClosePrice':ClosePrice}
-    
+dataset = DataFrame(dataFR, columns=['height', 'blocks', 'avg_diff', 'rate', 'reward_avg', 'dari', 'txs', 'cdd', 'ClosePrice'])
 
-plt.plot(Dates, dataFR['rate'])
+# Normalize the dataset
+nparr = dataset['rate'].values[::-1] 
+scaler = MinMaxScaler(feature_range=(0, 1))
+nptp = scaler.fit_transform(nparr)
+
+plt.plot(Dates, nptp, 'r', lw=2, label='rate')
+# plt.plot(Dates, dataset['ClosePrice'], 'b', lw=2, label='price')
+plt.grid()
+plt.legend(loc='best')
 plt.show()
-
-
-
-
-
-
-
-
-
